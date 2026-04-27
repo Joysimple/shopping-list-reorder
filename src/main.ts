@@ -80,31 +80,32 @@ export default class ShoppingListPlugin extends Plugin {
 			window.clearTimeout(timer);
 		}
 
-		// Check if it's a checkbox toggle (fast) or text edit (slow)
-		this.app.vault.read(file).then(content => {
-			const previousSections = this.fileStates.get(file.path);
-			const currentSections = this.parseSections(content);
-			
-			let isCheckboxToggle = false;
-			if (previousSections) {
-				const prevCheckedCount = previousSections.reduce((acc, s) => acc + s.items.filter(i => i.checked).length, 0);
-				const currCheckedCount = currentSections.reduce((acc, s) => acc + s.items.filter(i => i.checked).length, 0);
-				if (prevCheckedCount !== currCheckedCount) {
-					isCheckboxToggle = true;
-				}
-			}
-
-			const delay = isCheckboxToggle ? 500 : 3000;
-			
-			const newTimer = window.setTimeout(() => {
-				this.handleFileModify(file, isCheckboxToggle).catch(e => console.error(e));
-			}, delay);
-			
-			this.debounceTimers.set(file.path, newTimer);
-		});
+		const newTimer = window.setTimeout(() => {
+			this.handleFileModify(file).catch(e => console.error(e));
+		}, 1000);
+		
+		this.debounceTimers.set(file.path, newTimer);
 	}
 
-	async handleFileModify(file: TFile, isCheckboxToggle: boolean = false) {
+	isOnlyCheckboxToggle(current: SectionState[], previous: SectionState[]): boolean {
+		if (current.length !== previous.length) return false;
+		for (let i = 0; i < current.length; i++) {
+			const curr = current[i];
+			const prev = previous[i];
+			if (curr.header !== prev.header) return false;
+			if (curr.otherLines.length !== prev.otherLines.length) return false;
+			for (let j = 0; j < curr.otherLines.length; j++) {
+				if (curr.otherLines[j] !== prev.otherLines[j]) return false;
+			}
+			if (curr.items.length !== prev.items.length) return false;
+			for (let j = 0; j < curr.items.length; j++) {
+				if (curr.items[j].text !== prev.items[j].text) return false;
+			}
+		}
+		return true;
+	}
+
+	async handleFileModify(file: TFile) {
 		if (!(await this.isShoppingList(file))) {
 			return;
 		}
@@ -122,18 +123,20 @@ export default class ShoppingListPlugin extends Plugin {
 		const reorderedContent = this.reorderSections(currentSections, previousSections);
 
 		if (reorderedContent !== content) {
+			const isOnlyToggle = this.isOnlyCheckboxToggle(currentSections, previousSections);
+
 			// Cursor Awareness: Check if we are currently editing this file
 			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-			if (activeView && activeView.file?.path === file.path && !isCheckboxToggle) {
+			if (activeView && activeView.file?.path === file.path && !isOnlyToggle) {
 				const editor = activeView.editor;
 				const cursor = editor.getCursor();
 				
-				// If the cursor is on a line that would be moved, defer reordering
+				// If the cursor is on a line that would be moved/shifted during a text edit, defer reordering
 				const oldLines = content.split('\n');
 				const newLines = reorderedContent.split('\n');
 				
 				if (cursor.line < oldLines.length && oldLines[cursor.line] !== newLines[cursor.line]) {
-					console.debug('Cursor is on a moving line during text edit, deferring reorder');
+					console.debug('Cursor is on a shifting line during text edit, deferring reorder');
 					this.scheduleReorder(file);
 					return;
 				}
@@ -242,6 +245,7 @@ export default class ShoppingListPlugin extends Plugin {
 	}
 
 	onunload() {
+		this.debounceTimers.forEach(timer => window.clearTimeout(timer));
 		console.debug('Unloading Shopping List Reorder plugin');
 	}
 }
