@@ -97,14 +97,14 @@ export default class ShoppingListPlugin extends Plugin {
 			const delay = isCheckboxToggle ? 500 : 3000;
 			
 			const newTimer = window.setTimeout(() => {
-				this.handleFileModify(file).catch(e => console.error(e));
+				this.handleFileModify(file, isCheckboxToggle).catch(e => console.error(e));
 			}, delay);
 			
 			this.debounceTimers.set(file.path, newTimer);
 		});
 	}
 
-	async handleFileModify(file: TFile) {
+	async handleFileModify(file: TFile, isCheckboxToggle: boolean = false) {
 		if (!(await this.isShoppingList(file))) {
 			return;
 		}
@@ -124,17 +124,16 @@ export default class ShoppingListPlugin extends Plugin {
 		if (reorderedContent !== content) {
 			// Cursor Awareness: Check if we are currently editing this file
 			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-			if (activeView && activeView.file?.path === file.path) {
+			if (activeView && activeView.file?.path === file.path && !isCheckboxToggle) {
 				const editor = activeView.editor;
 				const cursor = editor.getCursor();
-				const cursorLineText = editor.getLine(cursor.line);
 				
 				// If the cursor is on a line that would be moved, defer reordering
 				const oldLines = content.split('\n');
 				const newLines = reorderedContent.split('\n');
 				
-				if (oldLines[cursor.line] !== newLines[cursor.line]) {
-					console.debug('Cursor is on a moving line, deferring reorder');
+				if (cursor.line < oldLines.length && oldLines[cursor.line] !== newLines[cursor.line]) {
+					console.debug('Cursor is on a moving line during text edit, deferring reorder');
 					this.scheduleReorder(file);
 					return;
 				}
