@@ -1,4 +1,4 @@
-import { Plugin, TFile, getAllTags } from 'obsidian';
+import { Plugin, TFile, getAllTags, MarkdownView } from 'obsidian';
 
 interface SectionState {
 	header: string | null;
@@ -15,6 +15,7 @@ interface ListItemState {
 export default class ShoppingListPlugin extends Plugin {
 	fileStates: Map<string, SectionState[]> = new Map();
 	isModifying: boolean = false;
+	debounceTimers: Map<string, number> = new Map();
 
 	async onload() {
 		console.debug('Loading Shopping List Reorder plugin');
@@ -22,7 +23,7 @@ export default class ShoppingListPlugin extends Plugin {
 		this.registerEvent(
 			this.app.vault.on('modify', (file) => {
 				if (file instanceof TFile && !this.isModifying) {
-					this.handleFileModify(file).catch(e => console.error(e));
+					this.scheduleReorder(file);
 				}
 			})
 		);
@@ -73,6 +74,36 @@ export default class ShoppingListPlugin extends Plugin {
 		return false;
 	}
 
+	scheduleReorder(file: TFile) {
+		const timer = this.debounceTimers.get(file.path);
+		if (timer) {
+			window.clearTimeout(timer);
+		}
+
+		// Check if it's a checkbox toggle (fast) or text edit (slow)
+		this.app.vault.read(file).then(content => {
+			const previousSections = this.fileStates.get(file.path);
+			const currentSections = this.parseSections(content);
+			
+			let isCheckboxToggle = false;
+			if (previousSections) {
+				const prevCheckedCount = previousSections.reduce((acc, s) => acc + s.items.filter(i => i.checked).length, 0);
+				const currCheckedCount = currentSections.reduce((acc, s) => acc + s.items.filter(i => i.checked).length, 0);
+				if (prevCheckedCount !== currCheckedCount) {
+					isCheckboxToggle = true;
+				}
+			}
+
+			const delay = isCheckboxToggle ? 500 : 3000;
+			
+			const newTimer = window.setTimeout(() => {
+				this.handleFileModify(file).catch(e => console.error(e));
+			}, delay);
+			
+			this.debounceTimers.set(file.path, newTimer);
+		});
+	}
+
 	async handleFileModify(file: TFile) {
 		if (!(await this.isShoppingList(file))) {
 			return;
@@ -91,6 +122,24 @@ export default class ShoppingListPlugin extends Plugin {
 		const reorderedContent = this.reorderSections(currentSections, previousSections);
 
 		if (reorderedContent !== content) {
+			// Cursor Awareness: Check if we are currently editing this file
+			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (activeView && activeView.file?.path === file.path) {
+				const editor = activeView.editor;
+				const cursor = editor.getCursor();
+				const cursorLineText = editor.getLine(cursor.line);
+				
+				// If the cursor is on a line that would be moved, defer reordering
+				const oldLines = content.split('\n');
+				const newLines = reorderedContent.split('\n');
+				
+				if (oldLines[cursor.line] !== newLines[cursor.line]) {
+					console.debug('Cursor is on a moving line, deferring reorder');
+					this.scheduleReorder(file);
+					return;
+				}
+			}
+
 			console.debug('Reordering shopping list for', file.path);
 			this.isModifying = true;
 			try {
