@@ -249,3 +249,49 @@ this.registerInterval(window.setInterval(() => { /* ... */ }, 1000));
 - Developer policies: https://docs.obsidian.md/Developer+policies
 - Plugin guidelines: https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines
 - Style guide: https://help.obsidian.md/style-guide
+
+---
+
+# Obsidian Shopping List Plugin - Logic & Architecture
+
+## Overview
+This plugin automatically reorders list items in Obsidian notes that are designated as shopping lists. It moves checked items to the bottom of their respective sections while maintaining the relative order of unchecked items.
+
+## Identification Logic
+A file is processed only if it meets one of the following criteria:
+- Frontmatter contains `shopping-list: true`.
+- Content contains the tag `#shopping-list` or `shopping-list`.
+
+## Architecture
+
+### State Management
+- **`fileStates`**: A `Map<string, SectionState[]>` that stores the last known parsed state of each shopping list file. This allows the plugin to distinguish between "already checked" items and "newly checked" items during a modification.
+- **`isModifying`**: A guard flag to prevent infinite loops when the plugin itself modifies the file.
+
+### Processing Pipeline
+1.  **Event Trigger**: The plugin listens to the `modify` event on the Obsidian vault.
+2.  **Parsing (`parseSections`)**: 
+    - Content is split into sections based on Markdown headers (`#`).
+    - Within each section, lines are identified as either `ListItemState` (if they match the checkbox regex) or `otherLines` (text, whitespace, or non-checkbox lines).
+    - **Supported Formats**: Supports both bulleted (`- [ ]`) and numbered (`1. [ ]`) list items.
+3.  **Reordering (`reorderSections`)**:
+    - Compares the `current` state with the `previous` state.
+    - Items are categorized into four groups:
+        1.  `stillUnchecked`: Remained unchecked since last state.
+        2.  `newlyUnchecked`: Were checked, now unchecked.
+        3.  `stillChecked`: Remained checked since last state.
+        4.  `newlyChecked`: Were unchecked, now checked.
+    - The items are reconstructed in the order: `stillUnchecked` -> `newlyUnchecked` -> `stillChecked` -> `newlyChecked`.
+    - This logic ensures that checking an item moves it to the bottom of the section, and unchecking an item moves it to the bottom of the unchecked list.
+4.  **Modification**: If the reordered content differs from the current file content, the plugin updates the file using `app.vault.modify`.
+
+## Regular Expressions
+- **Checkbox Detection**: `const checkboxMatch = line.match(/^(\s*(?:-|\d+\.)\s*\[([ xX])\]\s*)(.*)/);`
+    - Group 1: The prefix including the list marker and checkbox.
+    - Group 2: The checkbox state (` ` or `x`).
+    - Group 3: The item text content.
+
+## Maintenance Notes
+- When adding support for new list types, update the regex in `parseSections`.
+- The `reorderSections` logic relies on the `text` of the item to match across states; items with identical text in the same section may behave unpredictably if one is checked and the other is not.
+

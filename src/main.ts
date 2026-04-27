@@ -119,7 +119,7 @@ export default class ShoppingListPlugin extends Plugin {
 				}
 				currentSection = { header: line, items: [], otherLines: [] };
 			} else {
-				const checkboxMatch = line.match(/^(\s*-\s*\[([ xX])\]\s*)(.*)/);
+				const checkboxMatch = line.match(/^(\s*(?:-|\d+\.)\s*\[([ xX])\]\s*)(.*)/);
 				if (checkboxMatch) {
 					currentSection.items.push({
 						text: checkboxMatch[3],
