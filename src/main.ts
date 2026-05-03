@@ -1,4 +1,5 @@
 import { Plugin, TFile, getAllTags, MarkdownView } from 'obsidian';
+import { ShoppingListSettings, DEFAULT_SETTINGS, ShoppingListSettingTab } from './settings';
 
 interface SectionState {
 	header: string | null;
@@ -13,12 +14,17 @@ interface ListItemState {
 }
 
 export default class ShoppingListPlugin extends Plugin {
+	settings: ShoppingListSettings;
 	fileStates: Map<string, SectionState[]> = new Map();
 	isModifying: boolean = false;
 	debounceTimers: Map<string, number> = new Map();
 
 	async onload() {
 		console.debug('Loading Shopping List Reorder plugin');
+
+		await this.loadSettings();
+
+		this.addSettingTab(new ShoppingListSettingTab(this.app, this));
 
 		this.registerEvent(
 			this.app.vault.on('modify', (file) => {
@@ -41,6 +47,14 @@ export default class ShoppingListPlugin extends Plugin {
 				}
 			})
 		);
+	}
+
+	async loadSettings() {
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData()) as ShoppingListSettings;
+	}
+
+	async saveSettings() {
+		await this.saveData(this.settings);
 	}
 
 	async initializeStates() {
@@ -132,10 +146,10 @@ export default class ShoppingListPlugin extends Plugin {
 				const cursor = editor.getCursor();
 				
 				// If the cursor is on a line that would be moved/shifted during a text edit, defer reordering
-				const oldLines = content.split('\n');
+				const lines = content.split('\n');
 				const newLines = reorderedContent.split('\n');
 				
-				if (cursor.line < oldLines.length && oldLines[cursor.line] !== newLines[cursor.line]) {
+				if (cursor.line < lines.length && lines[cursor.line] !== newLines[cursor.line]) {
 					console.debug('Cursor is on a shifting line during text edit, deferring reorder');
 					this.scheduleReorder(file);
 					return;
@@ -233,8 +247,7 @@ export default class ShoppingListPlugin extends Plugin {
 			const finalItems = [
 				...stillUnchecked,
 				...newlyUnchecked,
-				...stillChecked,
-				...newlyChecked
+				...(this.settings.checkedItemsPlacement === 'top' ? [...newlyChecked, ...stillChecked] : [...stillChecked, ...newlyChecked])
 			];
 
 			resultLines.push(...currSec.otherLines);
