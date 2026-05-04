@@ -13,9 +13,9 @@ fi
 
 VERSION=$1
 
-# Ensure working directory is clean
-if [[ -n $(git status --porcelain) ]]; then
-  echo "Error: Working directory is not clean. Please commit or stash changes first."
+# Ensure there are no unstaged changes in tracked files
+if ! git diff --quiet; then
+  echo "Error: There are unstaged changes in tracked files. Please stage or stash them first."
   exit 1
 fi
 

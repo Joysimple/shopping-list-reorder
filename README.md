@@ -1,90 +1,43 @@
-# Obsidian Sample Plugin
+# Shopping List Reorder for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+An Obsidian plugin that automatically manages your shopping lists by reordering items as you check them off. It keeps your active items at the top and moves completed items to the bottom, ensuring your shopping experience is fluid and focused.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Features
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+- **Automatic Reordering**: When you check a checkbox, the item moves to the bottom of its section. Unchecking an item moves it back up to the active list.
+- **Section Awareness**: Respects Markdown headers (`#`). Reordering only happens within the current section, allowing you to maintain categories (e.g., "Produce", "Dairy") in a single file.
+- **Smart Debouncing**: Reorders occur after a 1-second delay of inactivity, preventing items from "jumping" while you are still making quick changes.
+- **Cursor Awareness**: If you are editing a line that is about to be moved, the plugin will defer reordering until you move your cursor or finish editing, ensuring your typing flow is never interrupted.
 
-## First time developing plugins?
+## Getting Started
 
-Quick starting guide for new plugin devs:
+The plugin only activates on files that are explicitly marked as shopping lists. You can do this in two ways:
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+1.  **Frontmatter**: Add `shopping-list: true` to the YAML frontmatter of your note.
+2.  **Tags**: Include the tag `#shopping-list` anywhere in your note.
 
-## Releasing new releases
+## Settings
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+- **Checked items placement**: Choose where newly checked items should go relative to existing checked items:
+    - **Top of checked items**: (Default) Newer completions appear at the top of the "checked" block.
+    - **Bottom of checked items**: Newer completions appear at the very end of the section.
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+## Installation
 
-## Adding your plugin to the community plugin list
+### From GitHub
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/Joysimple/obsidian-shopping-list/releases).
+2. Create a folder named `obsidian-shopping-list` in your vault's `.obsidian/plugins/` directory.
+3. Copy the downloaded files into that folder.
+4. Reload Obsidian and enable the plugin in the settings.
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+## Development
 
-## How to use
+If you want to contribute or build the plugin yourself:
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+1. Clone this repo.
+2. Install dependencies: `npm install`
+3. Build the plugin: `npm run build` (or `npm run dev` for watch mode)
+4. Use the provided `release.sh` script to bump versions and create tags: `./release.sh 0.0.6`
 
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
-
-If you have multiple URLs, you can also do:
-
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
-
-## API Documentation
-
-See https://docs.obsidian.md
+---
+*Created with ❤️  for a better shopping experience.*
