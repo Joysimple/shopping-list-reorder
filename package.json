@@ -1,6 +1,6 @@
 {
 	"name": "shopping-list-reorder",
-	"version": "0.0.9",
+	"version": "0.0.10",
 	"description": "An Obsidian plugin to manage shopping lists by automatically reordering items.",
 	"main": "main.js",
 	"type": "module",

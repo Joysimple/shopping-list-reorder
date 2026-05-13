@@ -25,7 +25,7 @@ The plugin only activates on files that are explicitly marked as shopping lists.
 ## Installation
 
 ### From GitHub
-1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/Joysimple/obsidian-shopping-list/releases).
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/Joysimple/shopping-list-reorder/releases).
 2. Create a folder named `shopping-list-reorder` in your vault's `.obsidian/plugins/` directory.
 3. Copy the downloaded files into that folder.
 4. Reload Obsidian and enable the plugin in the settings.
