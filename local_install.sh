@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-PLUGIN_NAME="shopping-list-reorder"
+PLUGIN_NAME="shopping-list-automatic-reorder"
 VAULT_PLUGINS_DIR="$HOME/Documents/Obsidian Vault/.obsidian/plugins"
 TARGET_DIR="$VAULT_PLUGINS_DIR/$PLUGIN_NAME"
 SOURCE_DIR="$(pwd)"

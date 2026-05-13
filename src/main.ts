@@ -20,7 +20,7 @@ export default class ShoppingListPlugin extends Plugin {
 	debounceTimers: Map<string, number> = new Map();
 
 	async onload() {
-		console.debug('Loading Shopping List Reorder plugin');
+		console.debug('Loading Automatic Shopping List Reorder plugin');
 
 		await this.loadSettings();
 

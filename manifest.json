@@ -1,6 +1,6 @@
 {
-	"id": "shopping-list-reorder",
-	"name": "Shopping List Reorder",
+	"id": "shopping-list-automatic-reorder",
+	"name": "Automatic Shopping List Reorder",
 	"version": "0.0.10",
 	"minAppVersion": "0.15.0",
 	"description": "Automatically moves purchased items to the bottom of their section.",
