@@ -37,6 +37,6 @@ git tag -a "$VERSION" -m "$VERSION"
 
 echo "---------------------------------------"
 echo "Successfully bumped version to $VERSION"
-echo "Tag $VERSION created locally."
-echo "Run 'git push origin main --tags' to publish."
+echo "Branch and Tag $VERSION updated locally."
+echo "Run 'git push origin main --tags' to push both branch and tags."
 echo "---------------------------------------"
