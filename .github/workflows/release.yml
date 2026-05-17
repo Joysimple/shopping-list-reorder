@@ -1,48 +1,48 @@
 name: Release Plugin
 
 on:
-  push:
-    tags:
-      - "*"
+    push:
+        tags:
+            - '*'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
+    build:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            id-token: write
+            attestations: write
 
-    steps:
-      - uses: actions/checkout@v6
+        steps:
+            - uses: actions/checkout@v6
 
-      - name: Use Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-          cache: "npm"
+            - name: Use Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: '24'
+                  cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install
+            - name: Install dependencies
+              run: npm install
 
-      - name: Build plugin
-        run: npm run build
+            - name: Build plugin
+              run: npm run build
 
-      - name: Attest Artifacts
-        uses: actions/attest-build-provenance@v4.1.0
-        with:
-          subject-path: |
-            main.js
-            manifest.json
-            styles.css
+            - name: Attest Artifacts
+              uses: actions/attest-build-provenance@v4.1.0
+              with:
+                  subject-path: |
+                      main.js
+                      manifest.json
+                      styles.css
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v3
-        with:
-          files: |
-            main.js
-            manifest.json
-            styles.css
-          generate_release_notes: true
-          draft: false
-          prerelease: false
+            - name: Create Release
+              uses: softprops/action-gh-release@v3
+              with:
+                  files: |
+                      main.js
+                      manifest.json
+                      styles.css
+                  generate_release_notes: true
+                  draft: false
+                  prerelease: false

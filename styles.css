@@ -6,3 +6,55 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.sl-button-container {
+    display: inline-flex;
+    gap: 8px;
+    margin-left: 12px;
+    vertical-align: middle;
+}
+
+.sl-clickable-header {
+    cursor: pointer;
+}
+
+.sl-button {
+    font-size: 0.7em;
+    padding: 2px 6px;
+    height: auto;
+    line-height: 1.2;
+    background-color: var(--interactive-normal);
+    color: var(--text-muted);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+}
+
+.sl-button:hover {
+    background-color: var(--interactive-hover);
+    color: var(--text-normal);
+}
+
+/* Hide content when collapsed */
+.sl-collapsed-content,
+.sl-hidden {
+    display: none !important;
+}
+
+/* Hide completed items within the scope */
+.sl-hide-completed-scope .task-list-item.is-checked {
+    display: none !important;
+}
+
+/* Optional: Make headers with active toggles look slightly different */
+.sl-collapsed-header {
+    opacity: 0.8;
+}
+
+.sl-hide-completed-header .sl-completed-button {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}

@@ -45,35 +45,35 @@ npm run build
 - **Organize code into multiple files**: Split functionality across separate modules rather than putting everything in `main.ts`.
 - Source lives in `src/`. Keep `main.ts` small and focused on plugin lifecycle (loading, unloading, registering commands).
 - **Example file structure**:
-  ```
-  src/
-    main.ts           # Plugin entry point, lifecycle management
-    settings.ts       # Settings interface and defaults
-    commands/         # Command implementations
-      command1.ts
-      command2.ts
-    ui/              # UI components, modals, views
-      modal.ts
-      view.ts
-    utils/           # Utility functions, helpers
-      helpers.ts
-      constants.ts
-    types.ts         # TypeScript interfaces and types
-  ```
+    ```
+    src/
+      main.ts           # Plugin entry point, lifecycle management
+      settings.ts       # Settings interface and defaults
+      commands/         # Command implementations
+        command1.ts
+        command2.ts
+      ui/              # UI components, modals, views
+        modal.ts
+        view.ts
+      utils/           # Utility functions, helpers
+        helpers.ts
+        constants.ts
+      types.ts         # TypeScript interfaces and types
+    ```
 - **Do not commit build artifacts**: Never commit `node_modules/`, `main.js`, or other generated files to version control.
 - Keep the plugin small. Avoid large dependencies. Prefer browser-compatible packages.
 - Generated output should be placed at the plugin root or `dist/` depending on your build setup. Release artifacts must end up at the top level of the plugin folder in the vault (`main.js`, `manifest.json`, `styles.css`).
 
 ## Manifest rules (`manifest.json`)
 
-- Must include (non-exhaustive):  
-  - `id` (plugin ID; for local dev it should match the folder name)  
-  - `name`  
-  - `version` (Semantic Versioning `x.y.z`)  
-  - `minAppVersion`  
-  - `description`  
-  - `isDesktopOnly` (boolean)  
-  - Optional: `author`, `authorUrl`, `fundingUrl` (string or map)
+- Must include (non-exhaustive):
+    - `id` (plugin ID; for local dev it should match the folder name)
+    - `name`
+    - `version` (Semantic Versioning `x.y.z`)
+    - `minAppVersion`
+    - `description`
+    - `isDesktopOnly` (boolean)
+    - Optional: `author`, `authorUrl`, `fundingUrl` (string or map)
 - Never change `id` after release. Treat it as stable API.
 - Keep `minAppVersion` accurate when using newer APIs.
 - Canonical requirements are coded here: https://github.com/obsidianmd/obsidian-releases/blob/master/.github/workflows/validate-plugin-entry.yml
@@ -81,9 +81,9 @@ npm run build
 ## Testing
 
 - Manual install for testing: copy `main.js`, `manifest.json`, `styles.css` (if any) to:
-  ```
-  <Vault>/.obsidian/plugins/<plugin-id>/
-  ```
+    ```
+    <Vault>/.obsidian/plugins/<plugin-id>/
+    ```
 - Reload Obsidian and enable the plugin in **Settings → Community plugins**.
 
 ## Commands & settings
@@ -147,12 +147,14 @@ Follow Obsidian's **Developer Policies** and **Plugin Guidelines**. In particula
 ## Agent do/don't
 
 **Do**
+
 - Add commands with stable IDs (don't rename once released).
 - Provide defaults and validation in settings.
 - Write idempotent code paths so reload/unload doesn't leak listeners or intervals.
 - Use `this.register*` helpers for everything that needs cleanup.
 
 **Don't**
+
 - Introduce network calls without an obvious user-facing reason and documentation.
 - Ship features that require cloud services without clear disclosure and explicit opt-in.
 - Store or transmit vault contents unless essential and consented.
@@ -162,45 +164,48 @@ Follow Obsidian's **Developer Policies** and **Plugin Guidelines**. In particula
 ### Organize code across multiple files
 
 **main.ts** (minimal, lifecycle only):
+
 ```ts
-import { Plugin } from "obsidian";
-import { MySettings, DEFAULT_SETTINGS } from "./settings";
-import { registerCommands } from "./commands";
+import { Plugin } from 'obsidian';
+import { MySettings, DEFAULT_SETTINGS } from './settings';
+import { registerCommands } from './commands';
 
 export default class MyPlugin extends Plugin {
-  settings: MySettings;
+    settings: MySettings;
 
-  async onload() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-    registerCommands(this);
-  }
+    async onload() {
+        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+        registerCommands(this);
+    }
 }
 ```
 
 **settings.ts**:
+
 ```ts
 export interface MySettings {
-  enabled: boolean;
-  apiKey: string;
+    enabled: boolean;
+    apiKey: string;
 }
 
 export const DEFAULT_SETTINGS: MySettings = {
-  enabled: true,
-  apiKey: "",
+    enabled: true,
+    apiKey: '',
 };
 ```
 
 **commands/index.ts**:
+
 ```ts
-import { Plugin } from "obsidian";
-import { doSomething } from "./my-command";
+import { Plugin } from 'obsidian';
+import { doSomething } from './my-command';
 
 export function registerCommands(plugin: Plugin) {
-  plugin.addCommand({
-    id: "do-something",
-    name: "Do something",
-    callback: () => doSomething(plugin),
-  });
+    plugin.addCommand({
+        id: 'do-something',
+        name: 'Do something',
+        callback: () => doSomething(plugin),
+    });
 }
 ```
 
@@ -208,9 +213,9 @@ export function registerCommands(plugin: Plugin) {
 
 ```ts
 this.addCommand({
-  id: "your-command-id",
-  name: "Do the thing",
-  callback: () => this.doTheThing(),
+    id: 'your-command-id',
+    name: 'Do the thing',
+    callback: () => this.doTheThing(),
 });
 ```
 
@@ -229,14 +234,24 @@ async onload() {
 ### Register listeners safely
 
 ```ts
-this.registerEvent(this.app.workspace.on("file-open", f => { /* ... */ }));
-this.registerDomEvent(window, "resize", () => { /* ... */ });
-this.registerInterval(window.setInterval(() => { /* ... */ }, 1000));
+this.registerEvent(
+    this.app.workspace.on('file-open', (f) => {
+        /* ... */
+    }),
+);
+this.registerDomEvent(window, 'resize', () => {
+    /* ... */
+});
+this.registerInterval(
+    window.setInterval(() => {
+        /* ... */
+    }, 1000),
+);
 ```
 
 ## Troubleshooting
 
-- Plugin doesn't load after build: ensure `main.js` and `manifest.json` are at the top level of the plugin folder under `<Vault>/.obsidian/plugins/<plugin-id>/`. 
+- Plugin doesn't load after build: ensure `main.js` and `manifest.json` are at the top level of the plugin folder under `<Vault>/.obsidian/plugins/<plugin-id>/`.
 - Build issues: if `main.js` is missing, run `npm run build` or `npm run dev` to compile your TypeScript source code.
 - Commands not appearing: verify `addCommand` runs after `onload` and IDs are unique.
 - Settings not persisting: ensure `loadData`/`saveData` are awaited and you re-render the UI after changes.
@@ -255,22 +270,27 @@ this.registerInterval(window.setInterval(() => { /* ... */ }, 1000));
 # Obsidian Shopping List Plugin - Logic & Architecture
 
 ## Overview
+
 This plugin automatically reorders list items in Obsidian notes that are designated as shopping lists. It moves checked items to the bottom of their respective sections while maintaining the relative order of unchecked items.
 
 ## Identification Logic
+
 A file is processed only if it meets one of the following criteria:
+
 - Frontmatter contains `shopping-list: true`.
 - Content contains the tag `#shopping-list` or `shopping-list`.
 
 ## Architecture
 
 ### State Management
+
 - **`fileStates`**: A `Map<string, SectionState[]>` that stores the last known parsed state of each shopping list file. This allows the plugin to distinguish between "already checked" items and "newly checked" items during a modification.
 - **`isModifying`**: A guard flag to prevent infinite loops when the plugin itself modifies the file.
 
 ### Processing Pipeline
+
 1.  **Event Trigger**: The plugin listens to the `modify` event on the Obsidian vault.
-2.  **Parsing (`parseSections`)**: 
+2.  **Parsing (`parseSections`)**:
     - Content is split into sections based on Markdown headers (`#`).
     - Within each section, lines are identified as either `ListItemState` (if they match the checkbox regex) or `otherLines` (text, whitespace, or non-checkbox lines).
     - **Supported Formats**: Supports both bulleted (`- [ ]`) and numbered (`1. [ ]`) list items.
@@ -286,12 +306,13 @@ A file is processed only if it meets one of the following criteria:
 4.  **Modification**: If the reordered content differs from the current file content, the plugin updates the file using `app.vault.modify`.
 
 ## Regular Expressions
+
 - **Checkbox Detection**: `const checkboxMatch = line.match(/^(\s*(?:-|\d+\.)\s*\[([ xX])\]\s*)(.*)/);`
     - Group 1: The prefix including the list marker and checkbox.
     - Group 2: The checkbox state (` ` or `x`).
     - Group 3: The item text content.
 
 ## Maintenance Notes
+
 - When adding support for new list types, update the regex in `parseSections`.
 - The `reorderSections` logic relies on the `text` of the item to match across states; items with identical text in the same section may behave unpredictably if one is checked and the other is not.
-

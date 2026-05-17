@@ -25,6 +25,7 @@ The plugin only activates on files that are explicitly marked as shopping lists.
 ## Installation
 
 ### From GitHub
+
 1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/Joysimple/shopping-list-automatic-reorder/releases).
 2. Create a folder named `shopping-list-automatic-reorder` in your vault's `.obsidian/plugins/` directory.
 3. Copy the downloaded files into that folder.
@@ -40,4 +41,5 @@ If you want to contribute or build the plugin yourself:
 4. Use the provided `release.sh` script to bump versions and create tags: `./release.sh 0.0.6`
 
 ---
-*Created with ❤️  for a better shopping experience.*
+
+_Created with ❤️ for a better shopping experience._
